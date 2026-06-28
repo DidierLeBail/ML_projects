@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 
 datapath = os.path.join(
     os.path.dirname(__file__), "data", "SMSSpamCollection.txt"
@@ -20,11 +21,13 @@ with open(datapath, 'r') as f:
 dataset = pd.DataFrame(dataset)
 
 print(dataset.head())
-print(dataset.tail())
 print()
 
-print(f"nb of samples: {len(dataset.index)}, should be 5574")
-assert len(dataset) == 5574
+try:
+    assert len(dataset) == 5574
+except AssertionError as err:
+    print(f"nb of samples: {len(dataset.index)}, should be 5574")
+    raise err
 print()
 
 class SpamClassifier:
@@ -54,10 +57,69 @@ def inspect_data(dataset: pd.DataFrame):
     """
     label_count = {}
     labels = dataset["label"].unique()
-    print(len(dataset))
     for label in labels:
         label_count[label] = sum(dataset["label"] == label)
+    print("nb of SMS per label:")
     print(label_count)
+    print()
 
-inspect_data(dataset)
-print(4825 + 747)
+    msg_length = []
+    for text in dataset["text"]:
+        msg_length.append( len(text.split(' ')) )
+    print(f"SMS max length: {max(msg_length)}")
+    print()
+    fig, ax = plt.subplots(1, 1)
+    ax.hist(msg_length, bins=20)
+    plt.show()
+
+    # separate the length distribution per label
+    msg_length = {label: [] for label in labels}
+    for label, text in zip(dataset["label"], dataset["text"]):
+        msg_length[label].append( len(text.split(' ')) )
+    fig, ax = plt.subplots(1, 1)
+    for label in labels:
+        ax.hist(msg_length[label], bins=20, label=label)
+    ax.legend()
+    ax.set_title("nb of words per SMS")
+    print(f"spam max length: {max(msg_length['spam'])}")
+    print()
+    plt.show()
+
+# inspect_data(dataset)
+
+def simple_classifier(text: str):
+    """Flags a msg as a spam when it contains a number with 11 digits.
+    """
+
+def evaluate_classifier(classifier: SpamClassifier, X_test: np.ndarray, Y_test: np.ndarray):
+    """Evaluates a spam classifier on a test set by computing the following metrics:
+    - nb of true positives (flag a spam as a spam)
+    - nb of true negatives (flag a ham as a ham)
+    - nb of false positives (flag a ham as a spam)
+    - nb of false negatives (flag a spam as a ham)
+    """
+    labels = ['spam', 'ham']
+    mat = np.zeros((2, 2))
+    print(mat)
+    for text, true_label in zip(X_test, Y_test):
+        flag = classifier(text)
+        mat[true_label, flag] += 1
+    mat /= 5574
+    print(mat)
+
+class RandomClassifier(SpamClassifier):
+    """A random classifier."""
+
+    def __init__(self, p_spam: float):
+        SpamClassifier.__init__(self)
+        self.p_spam = p_spam
+        self.rng = np.random.default_rng()
+    
+    def __call__(self, msg: np.ndarray):
+        return int(self.rng.random() < self.p_spam)
+
+X_test, Y_test = dataset["text"].to_list(), (dataset["label"] == 'spam').to_list()
+Y_test = [int(el) for el in Y_test]
+randomClassifier = RandomClassifier(p_spam=0.5)
+
+evaluate_classifier(randomClassifier, X_test, Y_test)
