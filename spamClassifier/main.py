@@ -4,7 +4,7 @@ import os
 import matplotlib.pyplot as plt
 
 datapath = os.path.join(
-    os.path.dirname(__file__), "data", "SMSSpamCollection.txt"
+    os.path.dirname(__file__), "data", "SMSSpamCollection"
 )
 
 # For some reason, this line did not work (5572 rows instead of 5574)
@@ -100,7 +100,6 @@ def evaluate_classifier(classifier: SpamClassifier, X_test: np.ndarray, Y_test: 
     """
     labels = ['spam', 'ham']
     mat = np.zeros((2, 2))
-    print(mat)
     for text, true_label in zip(X_test, Y_test):
         flag = classifier(text)
         mat[true_label, flag] += 1
