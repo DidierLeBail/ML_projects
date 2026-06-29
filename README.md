@@ -35,5 +35,5 @@ As a starting point, we consider a random classifier.
 This is a stochastic model characterized by a single trainable parameter, the probability $p$ of flagging a message as a spam.
 
 What is the best performance possible of a random classifier?
-Considering that the true proportion of spam messages is $p_g$ ($g$ standing for ground truth), let us derive the confusion matrix.
+Considering that the true proportion of spam messages is $p_g$ ($g$ standing for ground truth), let us derive its confusion matrix.
 
