@@ -103,7 +103,8 @@ def evaluate_classifier(classifier: SpamClassifier, X_test: np.ndarray, Y_test: 
     for text, true_label in zip(X_test, Y_test):
         flag = classifier(text)
         mat[true_label, flag] += 1
-    mat /= 5574
+    for row in mat:
+        row /= np.sum(row)
     print(mat)
 
 class RandomClassifier(SpamClassifier):
@@ -119,6 +120,6 @@ class RandomClassifier(SpamClassifier):
 
 X_test, Y_test = dataset["text"].to_list(), (dataset["label"] == 'spam').to_list()
 Y_test = [int(el) for el in Y_test]
-randomClassifier = RandomClassifier(p_spam=0.5)
+randomClassifier = RandomClassifier(p_spam=0.4)
 
 evaluate_classifier(randomClassifier, X_test, Y_test)
