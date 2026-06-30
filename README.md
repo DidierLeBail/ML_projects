@@ -45,37 +45,36 @@ $C_{k,l}=$ Proba that the model returns the class $l$ given the message belongs 
 = Proba that the model returns the class $l$
 
 So we have:
-$$
+```math
 C =
 \begin{bmatrix}
     1 - p & p \\
     1 - p & p
 \end{bmatrix}
-$$
+```
 
 Its accuracy writes:
-$$
+```math
 A(p)=(1-p_g) (1-p) + p_g p = 1 - p_g + (2 p_g - 1) p
-$$
+```
 which is maximized for
-$$
+```math
 p=H\left(
 p_g-\frac{1}{2}
 \right)
-$$
+```
 where $H$ denotes the Heaviside function.
 
 In any case, the maximum accuracy of a random classifier is
-$$
+```math
 A_{\text{max}}=\max(p_g,1-p_g)
-$$
+```
 
 ### Best classifier
 Let us denote by $f(T)$ the probability that the classifier flags the message $T$ as a spam.
 The best performance would occur if the $f(T)$ could all be tuned independently from each other.
 We have that:
-
-$$
+```math
 \begin{align}
 A[f]
 &=
@@ -84,25 +83,25 @@ A[f]
 &=
 P(\text{ham})+\sum_{T}f(T)\left(P(\text{spam},T)-P(\text{ham},T)\right)
 \end{align}
-$$
+```
 Since the $f(T)$ are independent trainable parameters, the maximum accuracy is reached for
-$$
+```math
 f(T)=H\left(
 P(\text{spam},T)-P(\text{ham},T)
 \right)=
 H\left(
 P(\text{spam}|T)-\frac{1}{2}
 \right)
-$$
+```
 
 The corresponding confusion matrix writes:
-$$
+```math
 \begin{cases}
 C_{0,0}=\sum_{T}P(T|\text{ham})H\left(P(\text{ham}|T)-\frac{1}{2}\right)
 \\
 C_{1,1}=\sum_{T}P(T|\text{spam})H\left(P(\text{spam}|T)-\frac{1}{2}\right)
 \end{cases}
-$$
+```
 
 Of course, this classifier cannot be implemented in practice, since we do not know the value of $H(P\left(\text{spam}|T)-\frac{1}{2}\right)$ for every message $T$.
 
@@ -111,20 +110,20 @@ Multinomial Bayes is a common NLP technique used to classify messages, which is 
 It can be trained in linear size of the training set and inference time is linear in the size of the messages.
 
 Given a sequence of tokens $T=(t_1, \cdots, t_n)$, the probability that the NBC flags the sequence as a spam writes:
-$$
+```math
 P^{\text{NBC}}(\text{flag}(T)=\text{spam})=
 \frac{P^{\text{NBC}}(\text{spam})P^{\text{NBC}}(T|\text{spam})}{P^{\text{NBC}}(\text{spam})P^{\text{NBC}}(T|\text{spam})+P^{\text{NBC}}(\text{ham})P^{\text{NBC}}(T|\text{ham})}
-$$
+```
 where
-$$
+```math
 P^{\text{NBC}}(T|\text{spam})=\prod_{i=1}^{n}P^{\text{NBC}}(t_{i}|\text{spam})
-$$
+```
 
 What is the number of independent trainable parameters of a NBC?
 Let us introduce $V$ the vocabulary, or set of possible tokens that compose a message.
 
 Let us introduce the following notations:
-$$
+```math
 \begin{cases}
 \forall t\in V,
 p_{t}=P^{\text{NBC}}(t|\text{spam}),q_{t}=P^{\text{NBC}}(t|\text{ham})
@@ -139,10 +138,10 @@ q=P^{\text{NBC}}(\text{ham})=1-p
 f(\vec{n})=P^{\text{NBC}}(\text{flag}(T)=\text{spam}),
 \text{where }\vec{n}^{T}=\vec{n}
 \end{cases}
-$$
+```
 
 Then, we have that:
-$$
+```math
 \begin{align}
 \forall\vec{n}\in\mathbb{N}^{V},
 f(\vec{n})
@@ -152,21 +151,21 @@ f(\vec{n})
 &=
 \frac{1}{1+\exp\left(\alpha+\vec{\alpha}\cdot\vec{n}\right)}
 \end{align}
-$$
+```
 where we have introduced:
-$$
+```math
 \begin{cases}
 \alpha=\log\left(\frac{q}{p}\right)
 \\
 \forall t\in V,\alpha_{t}=\log\left(\frac{q_t}{p_t}\right)
 \end{cases}
-$$
+```
 
 The $\alpha$ and the $\alpha_{t}$ are exactly the independent trainable parameters of the NBC, which makes $1+|V|$ trainable parameters.
 
 How to determine the parameters maximizing the NBC accuracy?
 Denoting by $\theta=(\alpha,\vec{\alpha})$ the model parameters, the accuracy writes:
-$$
+```math
 \begin{align*}
 A[\theta]
 &=
@@ -178,25 +177,25 @@ P(\text{ham})+
 \sum_{\vec{n}\in\mathbb{N}^{V}}
 f(\vec{n},\theta)(P(\text{spam},\vec{n})-P(\text{ham},\vec{n}))
 \end{align*}
-$$
+```
 
 Note that here:
-$$
+```math
 P(\text{spam},\vec{n})=
 \sum_{T|\vec{n}^{T}=\vec{n}}P(\text{spam},T)
-$$
+```
 
 Since the NBC output is supposed to match $P(\text{spam}|\vec{n})$ when the messages are generated according to a unigram distribution, we expect in that case the optimal $\theta$ to satisfy:
-$$
+```math
 f(\vec{n},\theta)=
 H\left(P(\text{spam}|\vec{n})-\frac{1}{2}\right)
-$$
+```
 
 However, given that $f$ is a sigmoid, it cannot fit a Heaviside function.
 To enhance the expressivity of our model, let us then consider that a message will be flagged as a spam with probability 1 as soon as the NBC estimates that it is a spam with a probability greater than 1/2.
 Said otherwise, we are now considering $H(f-\frac{1}{2})$ instead of $f$.
 We have that:
-$$
+```math
 \begin{align*}
 H\left(f(\vec{n},\theta)-\frac{1}{2}\right)
 &=
@@ -205,10 +204,10 @@ H\left(\frac{1}{1+e^{\alpha+\vec{\alpha}\cdot\vec{n}}}-\frac{1}{2}\right)
 &=
 1-H\left(\alpha+\vec{\alpha}\cdot\vec{n}\right)
 \end{align*}
-$$
+```
 
 This changes the accuracy:
-$$
+```math
 \begin{align*}
 A[\theta]
 &=
@@ -222,11 +221,11 @@ P(\text{spam})-
 H\left(\alpha+\vec{\alpha}\cdot\vec{n}\right)
 (P(\text{spam},\vec{n})-P(\text{ham},\vec{n}))
 \end{align*}
-$$
+```
 
 Let us rewrite the terms to make $P(\text{spam}|\vec{n})$ explicit.
 We have:
-$$
+```math
 \begin{align*}
 P(\text{spam},\vec{n})-P(\text{ham},\vec{n})
 &=
@@ -243,18 +242,17 @@ P(\vec{n})
 &=
 2P(\vec{n})\left[P(\text{spam}|\vec{n})-\frac{1}{2}\right]
 \end{align*}
-$$
+```
 
 We deduce that:
-$$
-A[\theta]
-=
+```math
+A[\theta]=
 P(\text{spam})-2
 \sum_{\vec{n}\in\mathbb{N}^{V}}
 P(\vec{n})
 \left(P(\text{spam}|\vec{n})-\frac{1}{2}\right)
 H\left(\alpha+\vec{\alpha}\cdot\vec{n}\right)
-$$
+```
 
 In order to maximize its accuracy, a NBC should ideally have $\alpha+\vec{\alpha}\cdot\vec{n}$ and $P(\text{spam}|\vec{n})-\frac{1}{2}$ of opposite signs, which corresponds to $P(\text{spam}|\vec{n})-\frac{1}{2}$ and $P^{\text{NBC}}(\text{spam}|\vec{n})-\frac{1}{2}$ having the same signs.
 However, in the case the messages are *not* generated according to a unigram distribution, this will not be possible for every $\vec{n}$.
@@ -262,7 +260,7 @@ However, in the case the messages are *not* generated according to a unigram dis
 In practice, the strategy used to train a NBC is to sample the unigram probabilities from the dataset and use them as the NBC parameters.
 By using a simple counter-example, we will show here that the accuracy is not maximized by such a choice.
 To do this, let us introduce the notations:
-$$
+```math
 \begin{cases}
 \lambda_{\vec{n}}=P(\vec{n})
 \left(P(\text{spam}|\vec{n})-\frac{1}{2}\right)
@@ -271,17 +269,17 @@ p_g=P(\text{spam})
 \\
 \alpha_{g}=\log\left(\frac{1-p_g}{p_g}\right)
 \end{cases}
-$$
+```
 
 Then, let us consider a simple case where $|V|=1$ and $||\vec{n}||_{1}\leq1$.
 For that toy data distribution, we have:
-$$
+```math
 A[\theta]
 =
 P(\text{spam})-2\left(
 \lambda_{0}H(\alpha)+\lambda_{1}H(\alpha+\alpha_{1})
 \right)
-$$
+```
 
 Here, maximizing the accuracy is simple and summarized by the following table, depending on the signs of $\lambda_{0}$ and $\lambda_{1}$:
 | $\lambda_{0}$ | $\lambda_{1}$ | $\alpha$ | $\alpha_{1}$ |
@@ -297,7 +295,7 @@ If that is the case, we would need in particular that $\lambda_{0}>0$ is always 
 $P(\text{spam}|0)>\frac{1}{2}$ is compatible with $p_g>\frac{1}{2}$.
 Let us exhibit a data distribution for which this is not the case.
 Let us introduce $\epsilon>0$ such that:
-$$
+```math
 \begin{cases}
 P(\text{spam},0)=\left(\frac{1}{2}+\epsilon\right)P(0)
 \\
@@ -307,26 +305,26 @@ P(\text{ham},0)=\left(\frac{1}{2}-\epsilon\right)P(0)
 \\
 P(\text{ham},1)=\frac{1}{2}+\epsilon-\left(\frac{1}{2}-\epsilon\right)P(0)
 \end{cases}
-$$
+```
 
 When this distribution is legitimate, it automatically satisfies:
-$$
+```math
 \begin{cases}
 P(\text{spam}|0)=\frac{1}{2}+\epsilon
 \\
 p_g=\frac{1}{2}-\epsilon
 \end{cases}
-$$
+```
 which would yield us the counter-example we seek.
 
 Now, when $\epsilon\xrightarrow{}0$, it can be shown (cf expression above) that any value between 0 and 1 for $P(0)$ would make this distribution legitimate.
 Then, we are assured of the existence of a couple $(\epsilon,P(0))$ that makes the joint distribution above legitimate.
 
 As a conclusion, depending on the particular data distribution, the classifier accuracy is *not* maximized when the classifier distribution is built from the data statistics, i.e. we should generally have that:
-$$
+```math
 \frac{P^{\text{NBC}}(t|\text{spam})}{P^{\text{NBC}}(t|\text{ham})}
 \neq
 \frac{P(t|\text{spam})}{P(t|\text{ham})}
-$$
+```
 
 However, when the data are generated according to a unigram distribution, as assumed in the NBC, the equality is recovered.
