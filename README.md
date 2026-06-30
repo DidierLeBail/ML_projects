@@ -33,7 +33,6 @@ It writes:
 ```math
 A = \sum_{k}p_{k}C_{k,k}
 ```
-
 where $p_k$ denotes the proportion of samples belonging to the class $k$.
 
 ### Baseline: random classifier
