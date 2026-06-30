@@ -132,7 +132,7 @@ p=P^{\text{NBC}}(\text{spam})
 \\
 q=P^{\text{NBC}}(\text{ham})=1-p
 \\
-\forall \text{ message }T,\forall t\in V,n^{T}_{t}=\text{nb of occurrences of $t$ in $T$}
+\forall \text{ message }T,\forall t\in V,n^{T}_{t}=\text{nb of occurrences of } t \text{ in }T
 \\
 \forall\vec{n}\in\mathbb{N}^{V},
 f(\vec{n})=P^{\text{NBC}}(\text{flag}(T)=\text{spam}),
