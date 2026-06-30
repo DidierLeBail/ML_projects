@@ -29,7 +29,6 @@ $C_{k,l}=$ proportion of messages from class $k$ considered to be in class $l$
 For instance, $C_{0,1}=$ proportion of hams flagged as spams.
 From the confusion matrix, we can derive the model accuracy, or the probability that it classifies a sample correctly.
 It writes:
-
 ```math
 A = \sum_{k}p_{k}C_{k,k}
 ```
