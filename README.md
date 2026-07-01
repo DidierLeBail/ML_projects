@@ -328,3 +328,9 @@ As a conclusion, depending on the particular data distribution, the classifier a
 ```
 
 However, when the data are generated according to a unigram distribution, as assumed in the NBC, the equality is recovered.
+
+# TODO
+- how to interpret the maximum accuracy? see whether it relates to the KL DV btw e.g. $P^{\text{NBC}}(\text{spam}|t)$ and $P(\text{spam}|t)$
+- how many data distr allow the NBC classifier trained in the standard way to be optimal?
+- generalize these results by introducing the notion of symmetry in a classifier model, symmetrized data distr; then the question is how many data distr
+allow the classifier coinciding with the symmetrized data distr to be optimal?
