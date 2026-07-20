@@ -109,33 +109,33 @@ Of course, this classifier cannot be implemented in practice, since we do not kn
 Multinomial Bayes is a common NLP technique used to classify messages, which is equivalent to unigram language models.
 It can be trained in linear size of the training set and inference time is linear in the size of the messages.
 
-Given a sequence of tokens $T=(t_1, \cdots, t_n)$, the probability that the NBC flags the sequence as a spam writes:
+Given a sequence of tokens $T=(t_1, \cdots, t_n)$, the probability that the MBC flags the sequence as a spam writes:
 ```math
-P^{\text{NBC}}(\text{flag}(T)=\text{spam})=
-\frac{P^{\text{NBC}}(\text{spam})P^{\text{NBC}}(T|\text{spam})}{P^{\text{NBC}}(\text{spam})P^{\text{NBC}}(T|\text{spam})+P^{\text{NBC}}(\text{ham})P^{\text{NBC}}(T|\text{ham})}
+P^{\text{MBC}}(\text{flag}(T)=\text{spam})=
+\frac{P^{\text{MBC}}(\text{spam})P^{\text{MBC}}(T|\text{spam})}{P^{\text{MBC}}(\text{spam})P^{\text{MBC}}(T|\text{spam})+P^{\text{MBC}}(\text{ham})P^{\text{MBC}}(T|\text{ham})}
 ```
 where
 ```math
-P^{\text{NBC}}(T|\text{spam})=\prod_{i=1}^{n}P^{\text{NBC}}(t_{i}|\text{spam})
+P^{\text{MBC}}(T|\text{spam})=\prod_{i=1}^{n}P^{\text{MBC}}(t_{i}|\text{spam})
 ```
 
-What is the number of independent trainable parameters of a NBC?
+What is the number of independent trainable parameters of a MBC?
 Let us introduce $V$ the vocabulary, or set of possible tokens that compose a message.
 
 Let us introduce the following notations:
 ```math
 \begin{cases}
 \forall t\in V,
-p_{t}=P^{\text{NBC}}(t|\text{spam}),q_{t}=P^{\text{NBC}}(t|\text{ham})
+p_{t}=P^{\text{MBC}}(t|\text{spam}),q_{t}=P^{\text{MBC}}(t|\text{ham})
 \\
-p=P^{\text{NBC}}(\text{spam})
+p=P^{\text{MBC}}(\text{spam})
 \\
-q=P^{\text{NBC}}(\text{ham})=1-p
+q=P^{\text{MBC}}(\text{ham})=1-p
 \\
 \forall \text{ message }T,\forall t\in V,n^{T}_{t}=\text{nb of occurrences of } t \text{ in }T
 \\
 \forall\vec{n}\in\mathbb{N}^{V},
-f(\vec{n})=P^{\text{NBC}}(\text{flag}(T)=\text{spam}),
+f(\vec{n})=P^{\text{MBC}}(\text{flag}(T)=\text{spam}),
 \text{where }\vec{n}^{T}=\vec{n}
 \end{cases}
 ```
@@ -161,9 +161,9 @@ where we have introduced:
 \end{cases}
 ```
 
-The $\alpha$ and the $\alpha_{t}$ are exactly the independent trainable parameters of the NBC, which makes $1+|V|$ trainable parameters.
+The $\alpha$ and the $\alpha_{t}$ are exactly the independent trainable parameters of the MBC, which makes $1+|V|$ trainable parameters.
 
-How to determine the parameters maximizing the NBC accuracy?
+How to determine the parameters maximizing the MBC accuracy?
 Denoting by $\theta=(\alpha,\vec{\alpha})$ the model parameters, the accuracy writes:
 ```math
 \begin{align*}
@@ -185,14 +185,14 @@ P(\text{spam},\vec{n})=
 \sum_{T|\vec{n}^{T}=\vec{n}}P(\text{spam},T)
 ```
 
-Since the NBC output is supposed to match $P(\text{spam}|\vec{n})$ when the messages are generated according to a unigram distribution, we expect in that case the optimal $\theta$ to satisfy:
+Since the MBC output is supposed to match $P(\text{spam}|\vec{n})$ when the messages are generated according to a unigram distribution, we expect in that case the optimal $\theta$ to satisfy:
 ```math
 f(\vec{n},\theta)=
 H\left(P(\text{spam}|\vec{n})-\frac{1}{2}\right)
 ```
 
 However, given that $f$ is a sigmoid, it cannot fit a Heaviside function.
-To enhance the expressivity of our model, let us then consider that a message will be flagged as a spam with probability 1 as soon as the NBC estimates that it is a spam with a probability greater than 1/2.
+To enhance the expressivity of our model, let us then consider that a message will be flagged as a spam with probability 1 as soon as the MBC estimates that it is a spam with a probability greater than 1/2.
 Said otherwise, we are now considering $H(f-\frac{1}{2})$ instead of $f$.
 We have that:
 ```math
@@ -254,10 +254,10 @@ P(\vec{n})
 H\left(\alpha+\vec{\alpha}\cdot\vec{n}\right)
 ```
 
-In order to maximize its accuracy, a NBC should ideally have $\alpha+\vec{\alpha}\cdot\vec{n}$ and $P(\text{spam}|\vec{n})-\frac{1}{2}$ of opposite signs, which corresponds to $P(\text{spam}|\vec{n})-\frac{1}{2}$ and $P^{\text{NBC}}(\text{spam}|\vec{n})-\frac{1}{2}$ having the same signs.
+In order to maximize its accuracy, a MBC should ideally have $\alpha+\vec{\alpha}\cdot\vec{n}$ and $P(\text{spam}|\vec{n})-\frac{1}{2}$ of opposite signs, which corresponds to $P(\text{spam}|\vec{n})-\frac{1}{2}$ and $P^{\text{MBC}}(\text{spam}|\vec{n})-\frac{1}{2}$ having the same signs.
 However, in the case the messages are *not* generated according to a unigram distribution, this will not be possible for every $\vec{n}$.
 
-In practice, the strategy used to train a NBC is to sample the unigram probabilities from the dataset and use them as the NBC parameters.
+In practice, the strategy used to train a MBC is to sample the unigram probabilities from the dataset and use them as the MBC parameters.
 By using a simple counter-example, we will show here that the accuracy is not maximized by such a choice.
 To do this, let us introduce the notations:
 ```math
@@ -289,7 +289,7 @@ Here, maximizing the accuracy is simple and summarized by the following table, d
 | $<0$ | $>0$ | $>0$ | $<-\alpha$ |
 | $<0$ | $<0$ | $>0$ | $>-\alpha$ |
 
-Is that compatible with the data statistics, i.e. the NBC parameters returned by a standard training algorithm?
+Is that compatible with the data statistics, i.e. the MBC parameters returned by a standard training algorithm?
 
 If that is the case, we would need in particular that $\lambda_{0}>0$ is always compatible with $\alpha_{g}<0$, or equivalently that
 $P(\text{spam}|0)>\frac{1}{2}$ is compatible with $p_g>\frac{1}{2}$.
@@ -322,15 +322,15 @@ Then, we are assured of the existence of a couple $(\epsilon,P(0))$ that makes t
 
 As a conclusion, depending on the particular data distribution, the classifier accuracy is *not* maximized when the classifier distribution is built from the data statistics, i.e. we should generally have that:
 ```math
-\frac{P^{\text{NBC}}(t|\text{spam})}{P^{\text{NBC}}(t|\text{ham})}
+\frac{P^{\text{MBC}}(t|\text{spam})}{P^{\text{MBC}}(t|\text{ham})}
 \neq
 \frac{P(t|\text{spam})}{P(t|\text{ham})}
 ```
 
-However, when the data are generated according to a unigram distribution, as assumed in the NBC, the equality is recovered.
+However, when the data are generated according to a unigram distribution, as assumed in the MBC, the equality is recovered.
 
 # TODO
-- how to interpret the maximum accuracy? see whether it relates to the KL DV btw e.g. $P^{\text{NBC}}(\text{spam}|t)$ and $P(\text{spam}|t)$
-- how many data distr allow the NBC classifier trained in the standard way to be optimal?
+- how to interpret the maximum accuracy? see whether it relates to the KL DV btw e.g. $P^{\text{MBC}}(\text{spam}|t)$ and $P(\text{spam}|t)$
+- how many data distr allow the MBC classifier trained in the standard way to be optimal?
 - generalize these results by introducing the notion of symmetry in a classifier model, symmetrized data distr; then the question is how many data distr
 allow the classifier coinciding with the symmetrized data distr to be optimal?
