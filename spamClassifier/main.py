@@ -1,60 +1,23 @@
-import pandas as pd
-import numpy as np
 import os
 import matplotlib.pyplot as plt
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
 
-datapath = os.path.join(
-    os.path.dirname(__file__), "data", "SMSSpamCollection"
+from classifier import RandomClassifier, evaluate_classifier
+from dataset import SMSdataset
+
+DATADIR = os.path.join(
+    os.path.dirname(__file__), "data"
 )
 
-# For some reason, this line did not work (5572 rows instead of 5574)
-# dataset = pd.read_csv(datapath, sep='\t', names=("label", "text"))
-# so i ended up loading the data with open into a dictionary
-
-dataset = {"label": [], "text": []}
-with open(datapath, 'r') as f:
-    lines = f.readlines()
-    for line in lines:
-        label, text = line.rstrip('\n').split('\t')
-        dataset["label"].append(label)
-        dataset["text"].append(text)
-dataset = pd.DataFrame(dataset)
-
-print(dataset.head())
-print()
-
-try:
-    assert len(dataset) == 5574
-except AssertionError as err:
-    print(f"nb of samples: {len(dataset.index)}, should be 5574")
-    raise err
-print()
-
-class SpamClassifier:
-    """A classifier that, given a SMS returns its probability of being a spam or a regular (ham) message.
-    
-    A SMS here is converted into a vector-valued time series (embedding).
-    The multinomial Bayesian classification model will then be independent from the time ordering of these series.
-    """
-
-    def __init__(self):
-        pass
-    
-    def fit(self, X_train: np.ndarray, Y_train: np.ndarray):
-        """Fits the model parameters from the training examples `X_train` and
-        their labels `Y_train`.
-        """
-
-    def __call__(self, msgs: np.ndarray):
-        pass
-
-def inspect_data(dataset: pd.DataFrame):
+def inspect_data(data: SMSdataset):
     """Computes some basic statistics about `dataset`:
     - number of representatives in each class
     - message length when separating words with spaces
-    
-    This allows us to set some hyperparameters of our model, such as the number of tokens it should process at once.
     """
+    dataset = data.data
     label_count = {}
     labels = dataset["label"].unique()
     for label in labels:
@@ -85,41 +48,31 @@ def inspect_data(dataset: pd.DataFrame):
     print()
     plt.show()
 
-# inspect_data(dataset)
+data = SMSdataset(DATADIR)
+data.load()
+df = data.data
 
-def simple_classifier(text: str):
-    """Flags a msg as a spam when it contains a number with 11 digits.
-    """
+# print(df.head())
+# print()
 
-def evaluate_classifier(classifier: SpamClassifier, X_test: np.ndarray, Y_test: np.ndarray):
-    """Evaluates a spam classifier on a test set by computing the following metrics:
-    - nb of true positives (flag a spam as a spam)
-    - nb of true negatives (flag a ham as a ham)
-    - nb of false positives (flag a ham as a spam)
-    - nb of false negatives (flag a spam as a ham)
-    """
-    labels = ['spam', 'ham']
-    mat = np.zeros((2, 2))
-    for text, true_label in zip(X_test, Y_test):
-        flag = classifier(text)
-        mat[true_label, flag] += 1
-    for row in mat:
-        row /= np.sum(row)
-    print(mat)
+# X_test, Y_test = df["text"].to_list(), df["label"]
+# randomClassifier = RandomClassifier(p_spam=0.4)
 
-class RandomClassifier(SpamClassifier):
-    """A random classifier."""
+# evaluate_classifier(randomClassifier, X_test, Y_test)
 
-    def __init__(self, p_spam: float):
-        SpamClassifier.__init__(self)
-        self.p_spam = p_spam
-        self.rng = np.random.default_rng()
-    
-    def __call__(self, msg: np.ndarray):
-        return int(self.rng.random() < self.p_spam)
+X_train, X_test, y_train, y_test = train_test_split(df["text"], df["label"], test_size=0.2)
+vec = TfidfVectorizer(stop_words="english")
+X_train_tfidf = vec.fit_transform(X_train)
+model = MultinomialNB().fit(X_train_tfidf, y_train)
+print(classification_report(y_test, model.predict(vec.transform(X_test))))
 
-X_test, Y_test = dataset["text"].to_list(), (dataset["label"] == 'spam').to_list()
-Y_test = [int(el) for el in Y_test]
-randomClassifier = RandomClassifier(p_spam=0.4)
+# get the most predictive words,
+# defined as the mutual info btw the Bernoulli variable associated to the word presence in a msg and the Bernoulli variable associated to the label
+"""
+2 Bernoulli variables of params p (X) and q (Y)
 
-evaluate_classifier(randomClassifier, X_test, Y_test)
+The mut info btw them writes
+I(X, Y) = \sum_{x,y}P(x, y)\log\left(\frac{P(x, y)}{P(x)P(y)}\right) =
+= - H(X, Y) - (1 - p)\log(1 - p) - p\log(p) - (1 - q)\log(1 - q) - q\log(q)
+"""
+
