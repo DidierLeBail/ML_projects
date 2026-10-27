@@ -1,4 +1,4 @@
 **/data
 **/.vscode
-**/__py_cache__
-**/example
+**/__pycache__
+**/.venv
